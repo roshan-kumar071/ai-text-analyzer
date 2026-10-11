@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Text Analyzer</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fc;
+            color: #20263a;
+        }
+
+        header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 20px 8%;
+        }
+
+        header h2 {
+            margin: 0;
+            color: #5145cd;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 45px auto;
+            padding: 0 20px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .hero h1 {
+            font-size: 36px;
+            margin-bottom: 12px;
+        }
+
+        .hero p {
+            color: #687087;
+            line-height: 1.6;
+        }
+
+        .card {
+            background: white;
+            padding: 28px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px #1d2a4d0d;
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 190px;
+            padding: 16px;
+            border: 1px solid #d8dce8;
+            border-radius: 10px;
+            font: inherit;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        textarea:focus {
+            outline: 2px solid #8178ee;
+            border-color: transparent;
+        }
+
+        .hint {
+            color: #687087;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        button {
+            border: none;
+            background: #5145cd;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 9px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 16px;
+        }
+
+        button:hover {
+            background: #4035b3;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .stat {
+            background: #f8f8ff;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .stat p {
+            color: #687087;
+            margin: 0 0 10px;
+            font-size: 14px;
+        }
+
+        .stat h3 {
+            font-size: 28px;
+            margin: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .section-title {
+            margin-top: 0;
+        }
+
+        .sentiment {
+            display: inline-block;
+            padding: 10px 16px;
+            background: #eeecff;
+            color: #5145cd;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .word-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eeeef4;
+        }
+
+        .word-row:last-child {
+            border-bottom: none;
+        }
+
+        .secondary-button {
+            background: #e9e7ff;
+            color: #4035b3;
+            margin-left: 8px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #687087;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            main {
+                margin-top: 28px;
+                padding: 0 14px;
+            }
+
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .stat {
+                padding: 14px;
+            }
+
+            .stat h3 {
+                font-size: 23px;
+            }
+
+            .secondary-button {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h2>TextAnalyzer</h2>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1>Understand Your Text</h1>
+            <p>
+                Analyze your writing, discover frequent words
+                and explore basic sentiment in seconds.
+            </p>
+        </section>
+
+        <section class="card">
+            <form method="POST" id="analyzer-form">
+                <label for="text">Enter your text</label>
+
+                <textarea
+                    id="text"
+                    name="text"
+                    placeholder="Paste or type your text here..."
+                    required
+                >{{ text }}</textarea>
+
+                <p class="hint" id="live-count">
+                    0 characters
+                </p>
+
+                <button type="submit">Analyze Text</button>
+                <button
+                    type="button"
+                    class="secondary-button"
+                    id="clear-button"
+                >
+                    Clear
+                </button>
+            </form>
+        </section>
+
+        {% if result %}
+        <section class="card" id="results">
+            <h2 class="section-title">Analysis Results</h2>
+
+            <div class="stats">
+                <div class="stat">
+                    <p>Words</p>
+                    <h3>{{ result.word_count }}</h3>
+                </div>
+
+                <div class="stat">
+                    <p>Characters</p>
+                    <h3>{{ result.character_count }}</h3>
+                </div>
+
+                <div class="stat">
+                    <p>Characters (no spaces)</p>
+                    <h3>{{ result.characters_without_spaces }}</h3>
+                </div>
+
+                <div class="stat">
+                    <p>Sentences</p>
+                    <h3>{{ result.sentence_count }}</h3>
+                </div>
+
+                <div class="stat">
+                    <p>Paragraphs</p>
+                    <h3>{{ result.paragraph_count }}</h3>
+                </div>
+
+                <div class="stat">
+                    <p>Sentiment</p>
+                    <h3>{{ result.sentiment }}</h3>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="section-title">Frequent Words</h2>
+
+            {% if result.frequent_words %}
+                {% for item in result.frequent_words %}
+                <div class="word-row">
+                    <span>{{ item.word }}</span>
+                    <strong>{{ item.count }}</strong>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No frequent words found.</p>
+            {% endif %}
+        </section>
+        {% endif %}
+    </main>
+
+    <footer>
+        Built with Python, Flask, HTML, CSS and JavaScript.
+    </footer>
+
+    <script>
+        const textInput = document.getElementById("text");
+        const liveCount = document.getElementById("live-count");
+        const clearButton = document.getElementById("clear-button");
+        const form = document.getElementById("analyzer-form");
+
+        function updateCount() {
+            liveCount.textContent =
+                textInput.value.length + " characters";
+        }
+
+        textInput.addEventListener("input", updateCount);
+
+        clearButton.addEventListener("click", function () {
+            textInput.value = "";
+            updateCount();
+            textInput.focus();
+
+            const results = document.getElementById("results");
+
+            if (results) {
+                results.remove();
+            }
+
+            const wordCard = document.querySelector(
+                "main > .card:nth-of-type(3)"
+            );
+
+            if (wordCard && wordCard.querySelector(".word-row")) {
+                wordCard.remove();
+            }
+        });
+
+        form.addEventListener("submit", function (event) {
+            if (!textInput.value.trim()) {
+                event.preventDefault();
+                alert("Please enter some text first.");
+            }
+        });
+
+        updateCount();
+    </script>
+
+</body>
+</html>
