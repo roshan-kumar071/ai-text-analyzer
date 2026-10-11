@@ -4,20 +4,37 @@ import re
 
 app = Flask(__name__)
 
-positive_words = [
+positive_words = {
     "good", "great", "happy", "excellent", "amazing",
-    "love", "best", "wonderful", "success", "beautiful"
-]
+    "love", "best", "wonderful", "success", "beautiful",
+    "awesome", "fantastic", "perfect", "enjoy", "helpful",
+    "kind", "brilliant", "positive", "delightful", "superb"
+}
 
-negative_words = [
+negative_words = {
     "bad", "sad", "hate", "worst", "terrible",
-    "poor", "angry", "awful", "failure", "disappointing"
-]
+    "poor", "angry", "awful", "failure", "disappointing",
+    "horrible", "wrong", "useless", "negative", "annoying",
+    "boring", "difficult", "problem", "painful", "unhappy"
+}
+
+
+negation_words = {
+    "not", "no", "never", "neither", "nor",
+    "hardly", "barely", "scarcely",
+    "isn't", "aren't", "wasn't", "weren't",
+    "don't", "doesn't", "didn't",
+    "can't", "couldn't", "won't", "wouldn't",
+    "shouldn't", "haven't", "hasn't", "hadn't"
+}
+
 
 stop_words = {
     "the", "is", "a", "an", "and", "or", "to", "of",
     "in", "on", "for", "it", "this", "that", "was",
-    "are", "i", "you", "he", "she", "we", "they"
+    "are", "i", "you", "he", "she", "we", "they",
+    "my", "your", "our", "with", "as", "at", "be",
+    "by", "from", "have", "has", "had", "not", "but"
 }
 
 
@@ -44,13 +61,31 @@ def analyze_text(text):
         if word not in stop_words
     ][:5]
 
-    positive_count = sum(
-        word_counts[word] for word in positive_words
-    )
+    
+    positive_count = 0
+    negative_count = 0
 
-    negative_count = sum(
-        word_counts[word] for word in negative_words
-    )
+    for index, word in enumerate(words):
+        previous_words = words[max(0, index - 3):index]
+
+        is_negated = any(
+            previous_word in negation_words
+            for previous_word in previous_words
+        )
+
+        if word in positive_words:
+            if is_negated:
+                negative_count += 1
+            else:
+                positive_count += 1
+
+        elif word in negative_words:
+            if is_negated:
+                positive_count += 1
+            else:
+                negative_count += 1
+
+    sentiment_total = positive_count + negative_count
 
     if positive_count > negative_count:
         sentiment = "Positive"
@@ -59,6 +94,18 @@ def analyze_text(text):
     else:
         sentiment = "Neutral"
 
+
+    if sentiment_total:
+        positive_percentage = round(
+            positive_count / sentiment_total * 100, 1
+        )
+        negative_percentage = round(
+            negative_count / sentiment_total * 100, 1
+        )
+    else:
+        positive_percentage = 0
+        negative_percentage = 0
+
     return {
         "word_count": len(words),
         "character_count": characters,
@@ -66,6 +113,10 @@ def analyze_text(text):
         "sentence_count": sentences,
         "paragraph_count": len(paragraphs),
         "frequent_words": frequent_words,
+        "positive_count": positive_count,
+        "negative_count": negative_count,
+        "positive_percentage": positive_percentage,
+        "negative_percentage": negative_percentage,
         "sentiment": sentiment,
     }
 
