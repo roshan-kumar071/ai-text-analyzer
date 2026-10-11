@@ -45,6 +45,42 @@ class TestTextAnalyzer(unittest.TestCase):
         self.assertEqual(result["negative_count"], 0)
         self.assertEqual(result["sentiment"], "Positive")
 
+    
+    def test_negation_with_extra_word(self):
+        result = analyze_text("This is not very good.")
+        self.assertEqual(result["sentiment"], "Negative")
+
+    def test_negation_with_extra_words(self):
+        result = analyze_text("This is not bad at all.")
+        self.assertEqual(result["sentiment"], "Positive")
+
+    
+    def test_negation_does_not_affect_later_sentence(self):
+        result = analyze_text("This is not good. This is excellent.")
+        self.assertEqual(result["sentiment"], "Neutral")
+        self.assertEqual(result["positive_count"], 1)
+        self.assertEqual(result["negative_count"], 1)
+
+    
+    def test_negation_resets_after_exclamation(self):
+        result = analyze_text("This is not good! This is excellent.")
+        self.assertEqual(result["negative_count"], 1)
+        self.assertEqual(result["positive_count"], 1)
+        self.assertEqual(result["sentiment"], "Neutral")
+
+    def test_negation_resets_after_but(self):
+        result = analyze_text("This is not good, but excellent.")
+        self.assertEqual(result["negative_count"], 1)
+        self.assertEqual(result["positive_count"], 1)
+        self.assertEqual(result["sentiment"], "Neutral")
+
+    
+    def test_negation_does_not_affect_unrelated_word(self):
+        result = analyze_text("This is not good, but the movie is excellent.")
+        self.assertEqual(result["positive_count"], 1)
+        self.assertEqual(result["negative_count"], 1)
+        self.assertEqual(result["sentiment"], "Neutral")
+
 
     def test_empty_text(self):
         result = analyze_text("")

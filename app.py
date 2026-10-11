@@ -41,6 +41,12 @@ stop_words = {
 def analyze_text(text):
     words = re.findall(r"\b[\w'-]+\b", text.lower())
 
+    sentiment_tokens = re.findall(
+        r"[.!?]+|[a-zA-Z]+(?:['’-][a-zA-Z]+)*",
+        text.lower()
+    )
+
+
     characters = len(text)
     characters_without_spaces = len(re.sub(r"\s", "", text))
 
@@ -60,18 +66,36 @@ def analyze_text(text):
         for word, count in word_counts.most_common()
         if word not in stop_words
     ][:5]
-
+    
     
     positive_count = 0
     negative_count = 0
+    negation_window = 3
+    sentence_boundaries = {".", "!", "?"}
+    contrast_words = {"but", "however"}
 
-    for index, word in enumerate(words):
-        previous_words = words[max(0, index - 3):index]
+    for index, word in enumerate(sentiment_tokens):
+        if word in sentence_boundaries:
+            continue
 
-        is_negated = any(
-            previous_word in negation_words
-            for previous_word in previous_words
-        )
+        if word in contrast_words:
+            continue
+
+        previous_words = sentiment_tokens[
+            max(0, index - negation_window):index
+        ]
+
+        is_negated = False
+
+        for previous_word in previous_words:
+            if previous_word in sentence_boundaries:
+                is_negated = False
+
+            elif previous_word in contrast_words:
+                is_negated = False
+
+            elif previous_word in negation_words:
+                is_negated = True
 
         if word in positive_words:
             if is_negated:
