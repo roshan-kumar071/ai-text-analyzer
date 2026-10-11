@@ -38,11 +38,11 @@ ai-text-analyzer/
 ### 1. Clone the repository
 
 ```bash
-git clone YOUR_GITHUB_REPOSITORY_URL
+git https://github.com/roshan-kumar071/ai-text-analyzer
 cd ai-text-analyzer
 ```
 
-Replace `YOUR_GITHUB_REPOSITORY_URL` with your repository URL.
+Replace `https://github.com/roshan-kumar071/ai-text-analyzer` with your repository URL.
 
 ### 2. Create a virtual environment
 
