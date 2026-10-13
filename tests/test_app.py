@@ -98,6 +98,25 @@ class TestTextAnalyzer(unittest.TestCase):
         self.assertEqual(result["negative_count"], 1)
         self.assertEqual(result["sentiment"], "Neutral")
 
+    
+    def test_intensifier_increases_positive_score(self):
+        normal = analyze_text("This is good.")
+        intensified = analyze_text("This is very good.")
+
+        self.assertGreater(
+            intensified["positive_score"],
+            normal["positive_score"]
+        )
+
+    def test_downtoner_reduces_positive_score(self):
+        normal = analyze_text("This is good.")
+        weakened = analyze_text("This is slightly good.")
+
+        self.assertLess(
+            weakened["positive_score"],
+            normal["positive_score"]
+        )
+        
 
     def test_empty_text(self):
         result = analyze_text("")

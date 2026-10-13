@@ -83,8 +83,26 @@ def analyze_text(text):
         for phrase in complex_negative_phrases
     )
     
+    
     positive_count = 0
     negative_count = 0
+    positive_score = 0
+    negative_score = 0
+
+    intensifiers = {
+        "very": 1.5,
+        "extremely": 2.0,
+        "really": 1.5,
+        "incredibly": 2.0,
+        "absolutely": 2.0,
+    }
+
+    downtoners = {
+        "slightly": 0.5,
+        "somewhat": 0.75,
+        "mildly": 0.5,
+    }
+
     negation_window = 3
     sentence_boundaries = {".", "!", "?"}
     contrast_words = {"but", "however"}
@@ -145,26 +163,43 @@ def analyze_text(text):
             if is_negated:
                 break
 
+        
+        modifier = 1.0
+
+        if previous_words:
+            previous_word = previous_words[-1]
+
+            if previous_word in intensifiers:
+                modifier = intensifiers[previous_word]
+
+            elif previous_word in downtoners:
+                modifier = downtoners[previous_word]
+
         if word in positive_words:
             if is_negated:
                 negative_count += 1
+                negative_score += modifier
             else:
                 positive_count += 1
+                positive_score += modifier
 
         elif word in negative_words:
             if is_negated:
                 positive_count += 1
+                positive_score += modifier
             else:
                 negative_count += 1
+                negative_score += modifier
 
     sentiment_total = positive_count + negative_count
 
-    if positive_count > negative_count:
+    if positive_score > negative_score:
         sentiment = "Positive"
-    elif negative_count > positive_count:
+    elif negative_score > positive_score:
         sentiment = "Negative"
     else:
         sentiment = "Neutral"
+
 
 
     if sentiment_total:
@@ -187,6 +222,8 @@ def analyze_text(text):
         "frequent_words": frequent_words,
         "positive_count": positive_count,
         "negative_count": negative_count,
+        "positive_score": round(positive_score, 2),
+        "negative_score": round(negative_score, 2),
         "positive_percentage": positive_percentage,
         "negative_percentage": negative_percentage,
         "sentiment": sentiment,
