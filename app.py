@@ -12,7 +12,7 @@ positive_words = {
 }
 
 negative_words = {
-    "bad", "sad", "hate", "worst", "terrible",
+    "bad", "sad", "hate", "worst", "terrible", "dislike",
     "poor", "angry", "awful", "failure", "disappointing",
     "horrible", "wrong", "useless", "negative", "annoying",
     "boring", "difficult", "problem", "painful", "unhappy"
@@ -67,6 +67,21 @@ def analyze_text(text):
         if word not in stop_words
     ][:5]
     
+    normalized_text = text.lower().replace("’", "'")
+
+    complex_negative_phrases = [
+        "don't think",
+        "do not think",
+        "doesn't think",
+        "does not think",
+        "didn't think",
+        "did not think",
+    ]
+
+    has_complex_negation = any(
+        phrase in normalized_text
+        for phrase in complex_negative_phrases
+    )
     
     positive_count = 0
     negative_count = 0
@@ -87,6 +102,13 @@ def analyze_text(text):
 
         is_negated = False
 
+        
+        previous_words = sentiment_tokens[
+            max(0, index - negation_window):index
+        ]
+
+        is_negated = False
+
         for previous_word in previous_words:
             if previous_word in sentence_boundaries:
                 is_negated = False
@@ -96,6 +118,32 @@ def analyze_text(text):
 
             elif previous_word in negation_words:
                 is_negated = True
+
+        segment_start = 0
+
+        for previous_index in range(index - 1, -1, -1):
+            if sentiment_tokens[previous_index] in (
+                sentence_boundaries | contrast_words
+            ):
+                segment_start = previous_index + 1
+                break
+
+        segment_words = sentiment_tokens[segment_start:index]
+
+        
+        for phrase in complex_negative_phrases:
+            phrase_words = phrase.split()
+            phrase_length = len(phrase_words)
+
+            for start in range(
+                len(segment_words) - phrase_length + 1
+            ):
+                if segment_words[start:start + phrase_length] == phrase_words:
+                    is_negated = True
+                    break
+
+            if is_negated:
+                break
 
         if word in positive_words:
             if is_negated:

@@ -55,6 +55,23 @@ class TestTextAnalyzer(unittest.TestCase):
         self.assertEqual(result["sentiment"], "Positive")
 
     
+    def test_complex_negation(self):
+        result = analyze_text("I don't think this is good.")
+        self.assertEqual(result["sentiment"], "Negative")
+
+    def test_negated_negative_word_in_longer_phrase(self):
+        result = analyze_text("I don't dislike this.")
+        self.assertEqual(result["sentiment"], "Positive")
+
+    def test_mixed_sentiment(self):
+        result = analyze_text(
+            "The movie is good, but the ending is terrible."
+        )
+        self.assertEqual(result["positive_count"], 1)
+        self.assertEqual(result["negative_count"], 1)
+        self.assertEqual(result["sentiment"], "Neutral")
+
+
     def test_negation_does_not_affect_later_sentence(self):
         result = analyze_text("This is not good. This is excellent.")
         self.assertEqual(result["sentiment"], "Neutral")
