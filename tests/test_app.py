@@ -116,7 +116,48 @@ class TestTextAnalyzer(unittest.TestCase):
             weakened["positive_score"],
             normal["positive_score"]
         )
-        
+
+    
+    def test_intensifier_increases_negative_score(self):
+        normal = analyze_text("This is bad.")
+        intensified = analyze_text("This is very bad.")
+
+        self.assertGreater(
+            intensified["negative_score"],
+            normal["negative_score"]
+        )
+
+    def test_downtoner_reduces_negative_score(self):
+        normal = analyze_text("This is bad.")
+        weakened = analyze_text("This is slightly bad.")
+
+        self.assertLess(
+            weakened["negative_score"],
+            normal["negative_score"]
+        )
+
+    
+    def test_negation_with_intensifier(self):
+        result = analyze_text("This is not very good.")
+
+        self.assertEqual(result["sentiment"], "Negative")
+        self.assertGreater(
+            result["negative_score"],
+            result["positive_score"]
+        )
+
+    
+    def test_weighted_sentiment_after_but(self):
+        result = analyze_text(
+            "This is very bad, but the ending is good."
+        )
+
+        self.assertGreater(
+            result["negative_score"],
+            result["positive_score"]
+        )
+
+
 
     def test_empty_text(self):
         result = analyze_text("")
