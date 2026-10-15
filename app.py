@@ -66,7 +66,7 @@ def analyze_text(text):
         for word, count in word_counts.most_common()
         if word not in stop_words
     ][:5]
-    
+
     normalized_text = text.lower().replace("’", "'")
 
     complex_negative_phrases = [
@@ -82,8 +82,8 @@ def analyze_text(text):
         phrase in normalized_text
         for phrase in complex_negative_phrases
     )
-    
-    
+
+
     positive_count = 0
     negative_count = 0
     positive_score = 0
@@ -103,15 +103,14 @@ def analyze_text(text):
         "mildly": 0.5,
     }
 
+
     negation_window = 3
     sentence_boundaries = {".", "!", "?"}
     contrast_words = {"but", "however"}
+    contrast_weight = 2.0
 
     for index, word in enumerate(sentiment_tokens):
-        if word in sentence_boundaries:
-            continue
-
-        if word in contrast_words:
+        if word in sentence_boundaries or word in contrast_words:
             continue
 
         previous_words = sentiment_tokens[
@@ -120,22 +119,13 @@ def analyze_text(text):
 
         is_negated = False
 
-        
-        previous_words = sentiment_tokens[
-            max(0, index - negation_window):index
-        ]
+        for previous_word in reversed(previous_words):
+            if previous_word in sentence_boundaries or previous_word in contrast_words:
+                break
 
-        is_negated = False
-
-        for previous_word in previous_words:
-            if previous_word in sentence_boundaries:
-                is_negated = False
-
-            elif previous_word in contrast_words:
-                is_negated = False
-
-            elif previous_word in negation_words:
+            if previous_word in negation_words:
                 is_negated = True
+                break
 
         segment_start = 0
 
@@ -148,7 +138,6 @@ def analyze_text(text):
 
         segment_words = sentiment_tokens[segment_start:index]
 
-        
         for phrase in complex_negative_phrases:
             phrase_words = phrase.split()
             phrase_length = len(phrase_words)
@@ -163,17 +152,25 @@ def analyze_text(text):
             if is_negated:
                 break
 
-        
         modifier = 1.0
 
         if previous_words:
             previous_word = previous_words[-1]
 
             if previous_word in intensifiers:
-                modifier = intensifiers[previous_word]
-
+                modifier *= intensifiers[previous_word]
             elif previous_word in downtoners:
-                modifier = downtoners[previous_word]
+                modifier *= downtoners[previous_word]
+
+        for previous_index in range(index - 1, -1, -1):
+            previous_token = sentiment_tokens[previous_index]
+
+            if previous_token in sentence_boundaries:
+                break
+
+            if previous_token in contrast_words:
+                modifier *= contrast_weight
+                break
 
         if word in positive_words:
             if is_negated:
