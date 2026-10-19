@@ -69,15 +69,22 @@ def analyze_text(text):
 
     normalized_text = text.lower().replace("’", "'")
 
-    complex_negative_phrases = [
+    
+    complex_negative_phrases = [    
         "don't think",
+        "don't really think",
         "do not think",
+        "do not really think",
         "doesn't think",
+        "doesn't really think",
         "does not think",
+        "does not really think",
         "didn't think",
+        "didn't really think",
         "did not think",
+        "did not really think",
     ]
-
+    
     has_complex_negation = any(
         phrase in normalized_text
         for phrase in complex_negative_phrases

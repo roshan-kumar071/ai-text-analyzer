@@ -59,6 +59,11 @@ class TestTextAnalyzer(unittest.TestCase):
         result = analyze_text("I don't think this is good.")
         self.assertEqual(result["sentiment"], "Negative")
 
+    
+    def test_complex_negation_with_extra_word(self):
+        result = analyze_text("I don't really think this is good.")
+        self.assertEqual(result["sentiment"], "Negative")
+
     def test_negated_negative_word_in_longer_phrase(self):
         result = analyze_text("I don't dislike this.")
         self.assertEqual(result["sentiment"], "Positive")
