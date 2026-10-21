@@ -238,6 +238,47 @@ def analyze_text(text):
     else:
         sentiment_type = sentiment
 
+
+    if sentiment_type == "Unclassified":
+        sentiment_interpretation = (
+            "No recognized positive or negative sentiment words were found."
+        )
+    elif sentiment_type == "Mixed":
+        if sentiment_balance > 0:
+            sentiment_interpretation = (
+                "The text contains both positive and negative sentiment, "
+                "but leans positive overall."
+            )
+        elif sentiment_balance < 0:
+            sentiment_interpretation = (
+                "The text contains both positive and negative sentiment, "
+                "but leans negative overall."
+            )
+        else:
+            sentiment_interpretation = (
+                "The text contains balanced positive and negative sentiment."
+            )
+    elif sentiment_balance >= 60:
+        sentiment_interpretation = (
+            "The text expresses strongly positive overall sentiment."
+        )
+    elif sentiment_balance > 0:
+        sentiment_interpretation = (
+            "The text leans positive overall."
+        )
+    elif sentiment_balance <= -60:
+        sentiment_interpretation = (
+            "The text expresses strongly negative overall sentiment."
+        )
+    elif sentiment_balance < 0:
+        sentiment_interpretation = (
+            "The text leans negative overall."
+        )
+    else:
+        sentiment_interpretation = (
+            "The text has a neutral overall sentiment score."
+        )
+
     if sentiment_total:
         positive_percentage = round(
             positive_count / sentiment_total * 100, 1
@@ -266,6 +307,7 @@ def analyze_text(text):
         "sentiment_type": sentiment_type,
         "sentiment_confidence": sentiment_confidence,
         "sentiment_balance": sentiment_balance,
+                "sentiment_interpretation": sentiment_interpretation,
     }
 
 
