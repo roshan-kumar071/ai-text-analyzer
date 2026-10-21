@@ -202,6 +202,17 @@ def analyze_text(text):
 
     sentiment_total = positive_count + negative_count
 
+    total_score = positive_score + negative_score
+
+    if total_score > 0:
+        sentiment_balance = round(
+            (positive_score - negative_score)
+            / total_score * 100,
+            1
+        )
+    else:
+        sentiment_balance = 0
+
     if positive_score > negative_score:
         sentiment = "Positive"
     elif negative_score > positive_score:
@@ -254,6 +265,7 @@ def analyze_text(text):
         "sentiment": sentiment,
         "sentiment_type": sentiment_type,
         "sentiment_confidence": sentiment_confidence,
+        "sentiment_balance": sentiment_balance,
     }
 
 
