@@ -1,6 +1,6 @@
 
 import unittest
-from app import app, analyze_text
+from app import app, analyze_text, generate_summary
 
 
 class TestTextAnalyzer(unittest.TestCase):
@@ -193,6 +193,29 @@ class TestTextAnalyzer(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Positive", response.data)
+
+
+class TestTextSummary(unittest.TestCase):
+
+    def test_empty_text_returns_empty_summary(self):
+        self.assertEqual(generate_summary(""), "")
+
+    def test_short_text_returns_original_text(self):
+        text = "The phone is excellent."
+        self.assertEqual(generate_summary(text), text)
+
+    def test_long_text_returns_limited_summary(self):
+        text = (
+            "The phone has an excellent camera. "
+            "The battery is great. "
+            "The design is beautiful. "
+            "The delivery was slow."
+        )
+
+        summary = generate_summary(text)
+
+        self.assertTrue(summary)
+        self.assertLessEqual(len(summary.split(". ")) , 3)
 
 
 if __name__ == "__main__":

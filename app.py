@@ -43,6 +43,52 @@ stop_words = {
 }
 
 
+def generate_summary(text, max_sentences=3):
+    """Extract the most relevant sentences from the input text."""
+    if not text or not text.strip():
+        return ""
+
+    sentences = re.split(r'(?<=[.!?])\s+', text.strip())
+    sentences = [sentence.strip() for sentence in sentences if sentence.strip()]
+
+    if len(sentences) <= max_sentences:
+        return " ".join(sentences)
+
+    stop_words = {
+        "the", "is", "a", "an", "and", "or", "to", "of",
+        "in", "on", "for", "it", "this", "that", "was",
+        "are", "i", "you", "he", "she", "we", "they",
+        "my", "your", "our", "with", "as", "at", "be",
+        "by", "from", "have", "has", "had"
+    }
+
+    word_frequencies = Counter(
+        word.lower()
+        for word in re.findall(r"\b[a-zA-Z]+\b", text)
+        if word.lower() not in stop_words
+    )
+
+    scored_sentences = []
+
+    for index, sentence in enumerate(sentences):
+        words = re.findall(r"\b[a-zA-Z]+\b", sentence.lower())
+        score = sum(word_frequencies.get(word, 0) for word in words)
+
+        if words:
+            score /= len(words)
+
+        scored_sentences.append((index, score, sentence))
+
+    selected = sorted(
+        scored_sentences,
+        key=lambda item: item[1],
+        reverse=True
+    )[:max_sentences]
+
+    selected.sort(key=lambda item: item[0])
+
+    return " ".join(sentence for _, _, sentence in selected)
+
 def analyze_text(text):
     words = re.findall(r"\b[\w'-]+\b", text.lower())
 
@@ -297,6 +343,7 @@ def analyze_text(text):
         "sentence_count": sentences,
         "paragraph_count": len(paragraphs),
         "frequent_words": frequent_words,
+        "summary": generate_summary(text),
         "positive_count": positive_count,
         "negative_count": negative_count,
         "positive_score": round(positive_score, 2),
