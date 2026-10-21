@@ -59,7 +59,7 @@ class TestTextAnalyzer(unittest.TestCase):
         result = analyze_text("I don't think this is good.")
         self.assertEqual(result["sentiment"], "Negative")
 
-    
+
     def test_complex_negation_with_extra_word(self):
         result = analyze_text("I don't really think this is good.")
         self.assertEqual(result["sentiment"], "Negative")
@@ -167,6 +167,20 @@ class TestTextAnalyzer(unittest.TestCase):
         result = analyze_text("")
         self.assertEqual(result["word_count"], 0)
         self.assertEqual(result["sentiment"], "Neutral")
+
+
+    def test_positive_sentiment_confidence(self):
+        result = analyze_text("This product is excellent.")
+        self.assertEqual(result["sentiment_confidence"], 100.0)
+
+    def test_negative_sentiment_confidence(self):
+        result = analyze_text("This product is terrible.")
+        self.assertEqual(result["sentiment_confidence"], 100.0)
+
+    def test_neutral_sentiment_confidence(self):
+        result = analyze_text("The weather is cloudy.")
+        self.assertEqual(result["sentiment_confidence"], 0)
+
 
     def test_home_page(self):
         response = self.client.get("/")

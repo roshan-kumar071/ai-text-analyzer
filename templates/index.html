@@ -300,8 +300,7 @@
             <form method="POST" id="analyzer-form">
                 <label for="text">Enter your text</label>
 
-                <textarea id="text" name="text" placeholder="Paste or type your text here..."
-                    required>{{ text }}</textarea>
+                <textarea id="text" name="text" placeholder="Paste or type your text here..." required>{{ text }}</textarea>
 
                 <p class="hint" id="live-count">
                     0 characters
@@ -344,9 +343,20 @@
                     <h3>{{ result.paragraph_count }}</h3>
                 </div>
 
+
                 <div class="stat">
                     <p>Sentiment</p>
                     <h3>{{ result.sentiment }}</h3>
+                </div>
+
+                <div class="stat">
+                    <p>Sentiment Type</p>
+                    <h3>{{ result.sentiment_type }}</h3>
+                </div>
+
+                <div class="stat">
+                    <p>Sentiment Confidence</p>
+                    <h3>{{ "%.1f"|format(result.sentiment_confidence)|replace(".0", "") }}%</h3>
                 </div>
             </div>
 

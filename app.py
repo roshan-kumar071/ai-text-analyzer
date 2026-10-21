@@ -8,14 +8,19 @@ positive_words = {
     "good", "great", "happy", "excellent", "amazing",
     "love", "best", "wonderful", "success", "beautiful",
     "awesome", "fantastic", "perfect", "enjoy", "helpful",
-    "kind", "brilliant", "positive", "delightful", "superb"
+    "kind", "brilliant", "positive", "delightful", "superb",
+    "excited", "exciting", "satisfied", "satisfying",
+    "enjoyable", "recommend"
 }
+
 
 negative_words = {
     "bad", "sad", "hate", "worst", "terrible", "dislike",
     "poor", "angry", "awful", "failure", "disappointing",
     "horrible", "wrong", "useless", "negative", "annoying",
-    "boring", "difficult", "problem", "painful", "unhappy"
+    "boring", "difficult", "problem", "painful", "unhappy",
+    "disappointed", "disappoint", "frustrated",
+    "frustrating", "waste"
 }
 
 
@@ -42,7 +47,7 @@ def analyze_text(text):
     words = re.findall(r"\b[\w'-]+\b", text.lower())
 
     sentiment_tokens = re.findall(
-        r"[.!?]+|[a-zA-Z]+(?:['’-][a-zA-Z]+)*",
+        r"[.!?]+|[a-zA-Z]+(?:['â€™-][a-zA-Z]+)*",
         text.lower()
     )
 
@@ -67,10 +72,10 @@ def analyze_text(text):
         if word not in stop_words
     ][:5]
 
-    normalized_text = text.lower().replace("’", "'")
+    normalized_text = text.lower().replace("â€™", "'")
 
-    
-    complex_negative_phrases = [    
+
+    complex_negative_phrases = [
         "don't think",
         "don't really think",
         "do not think",
@@ -84,7 +89,7 @@ def analyze_text(text):
         "did not think",
         "did not really think",
     ]
-    
+
     has_complex_negation = any(
         phrase in normalized_text
         for phrase in complex_negative_phrases
@@ -204,7 +209,23 @@ def analyze_text(text):
     else:
         sentiment = "Neutral"
 
+    total_score = positive_score + negative_score
 
+    if sentiment != "Neutral" and total_score > 0:
+        sentiment_confidence = round(
+            abs(positive_score - negative_score)
+            / total_score * 100,
+            1
+        )
+    else:
+        sentiment_confidence = 0
+
+    if positive_count > 0 and negative_count > 0:
+        sentiment_type = "Mixed"
+    elif sentiment_total == 0:
+        sentiment_type = "Unclassified"
+    else:
+        sentiment_type = sentiment
 
     if sentiment_total:
         positive_percentage = round(
@@ -231,6 +252,8 @@ def analyze_text(text):
         "positive_percentage": positive_percentage,
         "negative_percentage": negative_percentage,
         "sentiment": sentiment,
+        "sentiment_type": sentiment_type,
+        "sentiment_confidence": sentiment_confidence,
     }
 
 
